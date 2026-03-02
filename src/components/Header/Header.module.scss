@@ -2,28 +2,38 @@
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: vars.$spacing-xl;
 }
 
 .title {
-  font-family: vars.$font-family;
   font-weight: vars.$font-weight-medium;
   font-size: vars.$font-size-title;
   line-height: vars.$line-height-title;
-  letter-spacing: 0px;
   color: vars.$color-text;
-  opacity: 1;
-  margin: 0 0 16px;
+  margin: 0 0 vars.$spacing-md;
 }
 
 .description {
-  font-family: vars.$font-family;
   font-weight: vars.$font-weight-regular;
   font-size: vars.$font-size-body;
   line-height: vars.$line-height-body;
-  letter-spacing: 0px;
   color: vars.$color-text;
   text-align: center;
-  opacity: 1;
   margin: 0;
+}
+
+@media (max-width: vars.$breakpoint-sm) {
+  .header {
+    margin-bottom: vars.$spacing-lg;
+  }
+
+  .title {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .description {
+    font-size: vars.$font-size-base;
+    line-height: vars.$line-height-body;
+  }
 }

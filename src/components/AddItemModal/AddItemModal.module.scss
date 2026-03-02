@@ -1,4 +1,5 @@
 @use '@/styles/variables' as vars;
+@use '@/styles/mixins' as mixins;
 
 .overlay {
   position: fixed;
@@ -37,16 +38,14 @@
   box-shadow: vars.$shadow-modal;
   border-radius: vars.$radius-xl;
   width: vars.$modal-width;
-  padding: 32px 40px;
+  padding: vars.$spacing-xl vars.$card-padding;
   box-sizing: border-box;
 }
 
 .modal-title {
-  font-family: vars.$font-family;
   font-weight: vars.$font-weight-regular;
   font-size: vars.$font-size-body;
   line-height: vars.$line-height-body;
-  letter-spacing: 0px;
   text-align: left;
   color: vars.$color-text;
   margin: 0 0 20px;
@@ -55,10 +54,9 @@
 .modal-input {
   width: 100%;
   height: 60px;
-  background: vars.$color-list-bg 0% 0% no-repeat padding-box;
+  background: vars.$color-list-bg;
   border: 1px solid vars.$color-border;
-  padding: 0 16px;
-  font-family: vars.$font-family;
+  padding: 0 vars.$spacing-md;
   font-weight: vars.$font-weight-regular;
   font-size: vars.$font-size-body;
   color: vars.$color-text;
@@ -83,13 +81,7 @@
 }
 
 %btn-modal-base {
-  height: 49px;
-  border-radius: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: vars.$font-family;
+  @include mixins.btn-base;
   font-weight: vars.$font-weight-medium;
   font-size: vars.$font-size-base;
   letter-spacing: 0.08em;
@@ -100,7 +92,7 @@
 .btn-modal-add {
   @extend %btn-modal-base;
   width: 138px;
-  background: vars.$color-primary 0% 0% no-repeat padding-box;
+  background: vars.$color-primary;
   border: 1px solid vars.$color-primary;
   color: vars.$color-white;
 
@@ -119,11 +111,26 @@
 .btn-modal-cancel {
   @extend %btn-modal-base;
   width: 128px;
-  background: vars.$color-white 0% 0% no-repeat padding-box;
+  background: vars.$color-white;
   border: 1px solid vars.$color-primary;
   color: vars.$color-primary;
 
   &:hover {
     background-color: vars.$color-primary-light;
+  }
+}
+
+@media (max-width: vars.$breakpoint-sm) {
+  .modal-paper {
+    width: calc(100% - #{vars.$spacing-xl});
+    top: vars.$spacing-md;
+    padding: vars.$spacing-lg vars.$spacing-md;
+    border-radius: vars.$radius-lg;
+  }
+
+  .btn-modal-add,
+  .btn-modal-cancel {
+    flex: 1;
+    width: auto;
   }
 }

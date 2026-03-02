@@ -23,24 +23,20 @@ const useListManager = (): UseListManagerReturn => {
       const trimmed = text.trim();
       if (!trimmed) return;
 
-      setItems((prev) => {
-        saveToHistory(prev);
-        return [...prev, { id: generateId(), text: trimmed }];
-      });
+      saveToHistory(items);
+      setItems((prev) => [...prev, { id: generateId(), text: trimmed }]);
       setIsModalOpen(false);
     },
-    [saveToHistory]
+    [items, saveToHistory]
   );
 
   const deleteSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
 
-    setItems((prev) => {
-      saveToHistory(prev);
-      return prev.filter((item) => !selectedIds.has(item.id));
-    });
+    saveToHistory(items);
+    setItems((prev) => prev.filter((item) => !selectedIds.has(item.id)));
     setSelectedIds(new Set());
-  }, [selectedIds, saveToHistory]);
+  }, [items, selectedIds, saveToHistory]);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -56,17 +52,15 @@ const useListManager = (): UseListManagerReturn => {
 
   const deleteByDoubleClick = useCallback(
     (id: string) => {
-      setItems((prev) => {
-        saveToHistory(prev);
-        return prev.filter((item) => item.id !== id);
-      });
+      saveToHistory(items);
+      setItems((prev) => prev.filter((item) => item.id !== id));
       setSelectedIds((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
     },
-    [saveToHistory]
+    [items, saveToHistory]
   );
 
   const undo = useCallback(() => {

@@ -9,18 +9,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent linear-gradient(135deg, vars.$color-background-start 0%, vars.$color-background-end 100%) 0% 0% no-repeat padding-box;
-  opacity: 1;
+  background: linear-gradient(135deg, vars.$color-background-start 0%, vars.$color-background-end 100%);
   overflow-y: auto;
 }
 
 .card {
-  background: vars.$color-white 0% 0% no-repeat padding-box;
+  background: vars.$color-white;
   box-shadow: vars.$shadow-card;
   border-radius: vars.$radius-xl;
-  opacity: 1;
   padding: vars.$card-padding;
   width: 100%;
   max-width: vars.$card-max-width;
   min-height: vars.$card-min-height;
+}
+
+@media (max-width: vars.$breakpoint-sm) {
+  .page {
+    align-items: flex-start;
+    padding: vars.$spacing-md;
+  }
+
+  .card {
+    padding: vars.$spacing-lg vars.$spacing-md;
+    border-radius: vars.$radius-lg;
+    min-height: unset;
+  }
 }

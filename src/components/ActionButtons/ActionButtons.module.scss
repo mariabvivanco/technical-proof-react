@@ -1,4 +1,5 @@
 @use '@/styles/variables' as vars;
+@use '@/styles/mixins' as mixins;
 
 .actions {
   display: flex;
@@ -12,20 +13,12 @@
   gap: 12px;
 }
 
-// Estilos base compartidos entre botones outlined
 %btn-outlined {
-  background: vars.$color-white 0% 0% no-repeat padding-box;
+  @include mixins.btn-base;
+  background: vars.$color-white;
   border: 1px solid vars.$color-primary;
-  border-radius: 50px;
-  opacity: 1;
-  height: 49px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: vars.$color-primary;
   transition: background-color 0.2s ease;
-  font-family: vars.$font-family;
 
   &:hover {
     background-color: vars.$color-primary-light;
@@ -42,13 +35,11 @@
   }
 }
 
-// Botón Undo
 .btn-undo {
   @extend %btn-outlined;
   width: 81px;
 }
 
-// Botón Delete
 .btn-delete {
   @extend %btn-outlined;
   width: 124px;
@@ -57,20 +48,12 @@
   text-transform: uppercase;
 }
 
-// Botón Add
 .btn-add {
+  @include mixins.btn-base;
   width: 138px;
-  height: 49px;
-  background: vars.$color-primary 0% 0% no-repeat padding-box;
+  background: vars.$color-primary;
   border: 1px solid vars.$color-primary;
-  border-radius: 50px;
-  opacity: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: vars.$color-white;
-  font-family: vars.$font-family;
   font-weight: vars.$font-weight-medium;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -79,5 +62,16 @@
   &:hover {
     background-color: vars.$color-primary-hover;
     border-color: vars.$color-primary-hover;
+  }
+}
+
+@media (max-width: vars.$breakpoint-sm) {
+  .actions {
+    gap: vars.$spacing-sm;
+  }
+
+  .btn-add {
+    flex: 1;
+    width: auto;
   }
 }
