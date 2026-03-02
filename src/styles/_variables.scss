@@ -1,0 +1,56 @@
+// Colors
+$color-primary: #324BFF;
+$color-primary-hover: #2438cc;
+$color-primary-light: rgba(50, 75, 255, 0.08);
+
+$color-background-start: #A1C4FD;
+$color-background-end: #C2E9FB;
+
+$color-white: #FFFFFF;
+$color-text: #333333;
+$color-text-secondary: #555555;
+$color-list-bg: #F7F7F7;
+$color-border: #CCCCCC;
+$color-disabled: #CCCCCC;
+$color-shadow: rgba(0, 0, 0, 0.12); // #0000001F
+
+// Typography
+$font-family: 'Montserrat', Arial, sans-serif;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-size-base: 16px;
+$font-size-title: 40px;
+$line-height-title: 44px;
+$font-size-body: 18px;
+$line-height-body: 26px;
+$font-size-item: 18px;
+$line-height-item: 26px;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 40px;
+
+// Border radius
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 20px;
+$radius-pill: 999px;
+$radius-circle: 50%;
+
+// Shadows
+$shadow-card: 0px 5px 12px #0000001F;
+$shadow-modal: 0px 10px 24px #0000001F;
+
+// Modal
+$modal-width: 700px;
+$modal-height: 276px;
+
+// Card
+$card-max-width: 900px;
+$card-min-height: 577px;
+$card-padding: 40px;
