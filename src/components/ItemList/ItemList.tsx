@@ -12,7 +12,7 @@ interface ItemListProps {
 const ItemList = ({ items, selectedIds, onSelect, onDoubleClick }: ItemListProps) => {
   return (
     <div className={styles['list-container']}>
-      <ul>
+      <ul role="listbox" aria-multiselectable="true">
         {items.map((item) => (
           <ListItem
             key={item.id}

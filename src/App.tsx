@@ -11,6 +11,7 @@ const App = () => {
     selectedIds,
     canUndo,
     isModalOpen,
+    addError,
     addItem,
     deleteSelected,
     toggleSelect,
@@ -31,6 +32,8 @@ const App = () => {
           onSelect={toggleSelect}
           onDoubleClick={deleteByDoubleClick}
         />
+
+        {addError && <p className={styles.error} role="alert">{addError}</p>}
 
         <ActionButtons
           hasSelected={selectedIds.size > 0}

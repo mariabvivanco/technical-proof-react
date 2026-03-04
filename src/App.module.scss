@@ -23,6 +23,12 @@
   min-height: vars.$card-min-height;
 }
 
+.error {
+  color: vars.$color-danger;
+  font-size: 0.85rem;
+  margin: vars.$spacing-xs 0 0;
+}
+
 @media (max-width: vars.$breakpoint-sm) {
   .page {
     align-items: flex-start;

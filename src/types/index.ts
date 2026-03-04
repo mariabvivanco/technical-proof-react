@@ -8,6 +8,7 @@ export interface ListManagerState {
   selectedIds: Set<string>;
   canUndo: boolean;
   isModalOpen: boolean;
+  addError: string | null;
 }
 
 export interface ListManagerActions {

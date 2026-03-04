@@ -1,19 +1,13 @@
 import { useState, useOptimistic, useCallback, startTransition } from 'react';
-import type { ListItem } from '../types';
-import { createItem } from '../services/itemService';
+import type { ListItem, UseListManagerReturn } from '../types';
+import { INITIAL_ITEMS, createItem } from '../services/itemService';
 import useModal from './useModal';
 import useSelection from './useSelection';
 import useHistory from './useHistory';
 
-const INITIAL_ITEMS: ListItem[] = [
-  { id: crypto.randomUUID(), text: 'Item 1' },
-  { id: crypto.randomUUID(), text: 'Item 2' },
-  { id: crypto.randomUUID(), text: 'Item 3' },
-  { id: crypto.randomUUID(), text: 'Item 4' },
-];
-
-const useListManager = () => {
+const useListManager = (): UseListManagerReturn => {
   const [items, setItems] = useState<ListItem[]>(INITIAL_ITEMS);
+  const [addError, setAddError] = useState<string | null>(null);
   const [optimisticItems, addOptimistic] = useOptimistic(
     items,
     (state: ListItem[], item: ListItem) => [...state, item],
@@ -21,20 +15,22 @@ const useListManager = () => {
 
   const modal = useModal();
   const { selectedIds, toggle: toggleSelect, clear: clearSelection, remove: removeFromSelection } = useSelection();
-  const { save, undo, canUndo } = useHistory(restored => {
-    setItems(restored);
-    clearSelection();
-  });
+  const { save, undo, canUndo } = useHistory(restored => { setItems(restored); clearSelection(); });
 
-  const addItem = async (text: string) => {
+  const addItem = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    setAddError(null);
     startTransition(() => addOptimistic({ id: crypto.randomUUID(), text: trimmed }));
     save(items);
-    const item = await createItem(trimmed);
-    setItems(prev => [...prev, item]);
-    modal.close();
-  };
+    try {
+      const item = await createItem(trimmed);
+      setItems(prev => [...prev, item]);
+      modal.close();
+    } catch {
+      setAddError('Failed to add item. Please try again.');
+    }
+  }, [items, save, modal.close, addOptimistic]);
 
   const deleteSelected = useCallback(() => {
     if (!selectedIds.size) return;
@@ -54,6 +50,7 @@ const useListManager = () => {
     selectedIds,
     canUndo,
     isModalOpen: modal.isOpen,
+    addError,
     addItem,
     deleteSelected,
     toggleSelect,

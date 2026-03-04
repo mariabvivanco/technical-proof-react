@@ -9,6 +9,12 @@ vi.mock('react-dom', async () => {
 });
 
 vi.mock('../services/itemService', () => ({
+  INITIAL_ITEMS: [
+    { id: '1', text: 'Item 1' },
+    { id: '2', text: 'Item 2' },
+    { id: '3', text: 'Item 3' },
+    { id: '4', text: 'Item 4' },
+  ],
   createItem: vi.fn((text: string) =>
     Promise.resolve({ id: crypto.randomUUID(), text }),
   ),
@@ -26,7 +32,7 @@ describe('App - Integration', () => {
   describe('initial render', () => {
     it('renders the page with 4 default items', () => {
       render(<App />);
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
     });
 
     it('renders the title', () => {
@@ -64,7 +70,7 @@ describe('App - Integration', () => {
       await user.click(getPageAddButton());
       await user.type(screen.getByPlaceholderText('Type the text here...'), 'New Item');
       await user.click(getModalAddButton());
-      expect(screen.getAllByRole('listitem')).toHaveLength(5);
+      expect(screen.getAllByRole('option')).toHaveLength(5);
       expect(screen.getByText('New Item')).toBeInTheDocument();
     });
 
@@ -82,7 +88,7 @@ describe('App - Integration', () => {
       render(<App />);
       await user.click(getPageAddButton());
       expect(getModalAddButton()).toBeDisabled();
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
     });
 
     it('closes modal without adding when Cancel is clicked', async () => {
@@ -92,7 +98,7 @@ describe('App - Integration', () => {
       await user.type(screen.getByPlaceholderText('Type the text here...'), 'Some item');
       await user.click(screen.getByRole('button', { name: /cancel/i }));
       await waitFor(() => expect(screen.queryByText('Add item to list')).not.toBeInTheDocument());
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
     });
   });
 
@@ -101,7 +107,7 @@ describe('App - Integration', () => {
       const user = userEvent.setup();
       render(<App />);
       await user.click(screen.getByText('Item 1'));
-      const items = screen.getAllByRole('listitem');
+      const items = screen.getAllByRole('option');
       expect(items[0].className).toContain('selected');
     });
 
@@ -117,7 +123,7 @@ describe('App - Integration', () => {
       render(<App />);
       await user.click(screen.getByText('Item 1'));
       await user.click(screen.getByText('Item 1'));
-      const items = screen.getAllByRole('listitem');
+      const items = screen.getAllByRole('option');
       expect(items[0].className).not.toContain('selected');
     });
 
@@ -126,7 +132,7 @@ describe('App - Integration', () => {
       render(<App />);
       await user.click(screen.getByText('Item 1'));
       await user.click(screen.getByText('Item 3'));
-      const items = screen.getAllByRole('listitem');
+      const items = screen.getAllByRole('option');
       expect(items[0].className).toContain('selected');
       expect(items[2].className).toContain('selected');
     });
@@ -139,7 +145,7 @@ describe('App - Integration', () => {
       await user.click(screen.getByText('Item 1'));
       await user.click(screen.getByRole('button', { name: /delete/i }));
       expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
+      expect(screen.getAllByRole('option')).toHaveLength(3);
     });
 
     it('deletes multiple selected items', async () => {
@@ -148,7 +154,7 @@ describe('App - Integration', () => {
       await user.click(screen.getByText('Item 1'));
       await user.click(screen.getByText('Item 3'));
       await user.click(screen.getByRole('button', { name: /delete/i }));
-      expect(screen.getAllByRole('listitem')).toHaveLength(2);
+      expect(screen.getAllByRole('option')).toHaveLength(2);
     });
 
     it('disables Delete button after deletion clears selection', async () => {
@@ -164,7 +170,7 @@ describe('App - Integration', () => {
       render(<App />);
       await user.dblClick(screen.getByText('Item 2'));
       expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
+      expect(screen.getAllByRole('option')).toHaveLength(3);
     });
   });
 
@@ -191,7 +197,7 @@ describe('App - Integration', () => {
       );
       await user.click(screen.getByRole('button', { name: /undo/i }));
       expect(screen.queryByText('New Item')).not.toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
     });
 
     it('restores list after undoing a delete', async () => {
@@ -199,9 +205,9 @@ describe('App - Integration', () => {
       render(<App />);
       await user.click(screen.getByText('Item 1'));
       await user.click(screen.getByRole('button', { name: /delete/i }));
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
+      expect(screen.getAllByRole('option')).toHaveLength(3);
       await user.click(screen.getByRole('button', { name: /undo/i }));
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
       expect(screen.getByText('Item 1')).toBeInTheDocument();
     });
 
@@ -211,7 +217,7 @@ describe('App - Integration', () => {
       await user.dblClick(screen.getByText('Item 2'));
       await user.click(screen.getByRole('button', { name: /undo/i }));
       expect(screen.getByText('Item 2')).toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(4);
+      expect(screen.getAllByRole('option')).toHaveLength(4);
     });
 
     it('disables Undo button after all history is consumed', async () => {

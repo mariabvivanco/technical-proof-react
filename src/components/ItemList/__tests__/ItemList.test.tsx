@@ -29,7 +29,7 @@ describe('ItemList', () => {
 
   it('renders an empty list when no items are provided', () => {
     render(<ItemList {...defaultProps} items={[]} />);
-    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });
 
   it('calls onSelect with the correct id when an item is clicked', async () => {
@@ -50,7 +50,7 @@ describe('ItemList', () => {
 
   it('applies the selected modifier class to selected items', () => {
     render(<ItemList {...defaultProps} selectedIds={new Set(['2'])} />);
-    const items = screen.getAllByRole('listitem');
+    const items = screen.getAllByRole('option');
     expect(items[0].className).not.toContain('selected');
     expect(items[1].className).toContain('selected');
     expect(items[2].className).not.toContain('selected');
@@ -58,7 +58,7 @@ describe('ItemList', () => {
 
   it('applies selected class to multiple selected items', () => {
     render(<ItemList {...defaultProps} selectedIds={new Set(['1', '3'])} />);
-    const items = screen.getAllByRole('listitem');
+    const items = screen.getAllByRole('option');
     expect(items[0].className).toContain('selected');
     expect(items[1].className).not.toContain('selected');
     expect(items[2].className).toContain('selected');
@@ -66,7 +66,7 @@ describe('ItemList', () => {
 
   it('renders the correct number of list items', () => {
     render(<ItemList {...defaultProps} />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('option')).toHaveLength(3);
   });
 
   it('clicking different items calls onSelect with correct ids', async () => {

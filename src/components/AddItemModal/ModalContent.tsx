@@ -1,5 +1,6 @@
 import { useState, useActionState } from 'react';
 import styles from './AddItemModal.module.scss';
+import ModalActions from './ModalActions';
 
 interface ModalContentProps {
   onAdd: (text: string) => Promise<void>;
@@ -19,6 +20,8 @@ const ModalContent = ({ onAdd, onClose }: ModalContentProps) => {
     null,
   );
 
+  const handleCancel = () => { setValue(''); onClose(); };
+
   return (
     <div
       className={`${styles.overlay} ${styles['overlay--open']}`}
@@ -26,10 +29,13 @@ const ModalContent = ({ onAdd, onClose }: ModalContentProps) => {
     >
       <form
         className={styles['modal-paper']}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
         action={formAction}
         onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
       >
-        <p className={styles['modal-title']}>Add item to list</p>
+        <p id="modal-title" className={styles['modal-title']}>Add item to list</p>
 
         <input
           name="text"
@@ -40,22 +46,7 @@ const ModalContent = ({ onAdd, onClose }: ModalContentProps) => {
           onChange={(e) => setValue(e.target.value)}
         />
 
-        <div className={styles['modal-actions']}>
-          <button
-            className={styles['btn-modal-add']}
-            type="submit"
-            disabled={isPending || !value.trim()}
-          >
-            {isPending ? 'Adding…' : 'Add'}
-          </button>
-          <button
-            className={styles['btn-modal-cancel']}
-            type="button"
-            onClick={() => { setValue(''); onClose(); }}
-          >
-            Cancel
-          </button>
-        </div>
+        <ModalActions isPending={isPending} canSubmit={!!value.trim()} onCancel={handleCancel} />
       </form>
     </div>
   );
