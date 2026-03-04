@@ -9,7 +9,7 @@ const App = () => {
   const {
     items,
     selectedIds,
-    history,
+    canUndo,
     isModalOpen,
     addItem,
     deleteSelected,
@@ -34,7 +34,7 @@ const App = () => {
 
         <ActionButtons
           hasSelected={selectedIds.size > 0}
-          canUndo={history.length > 0}
+          canUndo={canUndo}
           onUndo={undo}
           onDelete={deleteSelected}
           onAdd={openModal}

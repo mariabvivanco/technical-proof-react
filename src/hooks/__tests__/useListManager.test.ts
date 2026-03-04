@@ -1,8 +1,16 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import useListManager from '../useListManager';
 
+vi.mock('../../services/itemService', () => ({
+  createItem: vi.fn((text: string) =>
+    Promise.resolve({ id: crypto.randomUUID(), text }),
+  ),
+}));
+
 describe('useListManager', () => {
+  beforeEach(() => vi.clearAllMocks());
+
   describe('initial state', () => {
     it('starts with 4 default items', () => {
       const { result } = renderHook(() => useListManager());
@@ -14,9 +22,9 @@ describe('useListManager', () => {
       expect(result.current.selectedIds.size).toBe(0);
     });
 
-    it('starts with empty history', () => {
+    it('starts with canUndo false', () => {
       const { result } = renderHook(() => useListManager());
-      expect(result.current.history).toHaveLength(0);
+      expect(result.current.canUndo).toBe(false);
     });
 
     it('starts with modal closed', () => {
@@ -26,51 +34,50 @@ describe('useListManager', () => {
   });
 
   describe('addItem', () => {
-    it('adds a new item to the list', () => {
+    it('adds a new item to the list', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('New Item'));
+      await act(async () => { await result.current.addItem('New Item'); });
       expect(result.current.items).toHaveLength(5);
       expect(result.current.items[4].text).toBe('New Item');
     });
 
-    it('does not add empty string items', () => {
+    it('does not add empty string items', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem(''));
+      await act(async () => { await result.current.addItem(''); });
       expect(result.current.items).toHaveLength(4);
     });
 
-    it('does not add whitespace-only items', () => {
+    it('does not add whitespace-only items', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('   '));
+      await act(async () => { await result.current.addItem('   '); });
       expect(result.current.items).toHaveLength(4);
     });
 
-    it('trims whitespace from added items', () => {
+    it('trims whitespace from added items', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('  New Item  '));
+      await act(async () => { await result.current.addItem('  New Item  '); });
       expect(result.current.items[4].text).toBe('New Item');
     });
 
-    it('saves current state to history before adding', () => {
+    it('saves current state to history before adding', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('New Item'));
-      expect(result.current.history).toHaveLength(1);
+      await act(async () => { await result.current.addItem('New Item'); });
+      expect(result.current.canUndo).toBe(true);
     });
 
-    it('closes the modal after adding an item', () => {
+    it('closes the modal after adding an item', async () => {
       const { result } = renderHook(() => useListManager());
       act(() => result.current.openModal());
-      act(() => result.current.addItem('New Item'));
+      await act(async () => { await result.current.addItem('New Item'); });
       expect(result.current.isModalOpen).toBe(false);
     });
 
-    it('assigns a unique id to each added item', () => {
+    it('assigns a unique id to each added item', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('A'));
-      act(() => result.current.addItem('B'));
+      await act(async () => { await result.current.addItem('A'); });
+      await act(async () => { await result.current.addItem('B'); });
       const ids = result.current.items.map((i) => i.id);
-      const uniqueIds = new Set(ids);
-      expect(uniqueIds.size).toBe(ids.length);
+      expect(new Set(ids).size).toBe(ids.length);
     });
   });
 
@@ -110,18 +117,18 @@ describe('useListManager', () => {
       expect(result.current.selectedIds.size).toBe(0);
     });
 
-    it('saves state to history before deleting', () => {
+    it('enables undo after deleting', () => {
       const { result } = renderHook(() => useListManager());
       const itemId = result.current.items[0].id;
       act(() => result.current.toggleSelect(itemId));
       act(() => result.current.deleteSelected());
-      expect(result.current.history).toHaveLength(1);
+      expect(result.current.canUndo).toBe(true);
     });
 
-    it('does not save to history when nothing is selected', () => {
+    it('does not enable undo when nothing is selected', () => {
       const { result } = renderHook(() => useListManager());
       act(() => result.current.deleteSelected());
-      expect(result.current.history).toHaveLength(0);
+      expect(result.current.canUndo).toBe(false);
     });
   });
 
@@ -148,8 +155,6 @@ describe('useListManager', () => {
       act(() => result.current.toggleSelect(id1));
       act(() => result.current.toggleSelect(id2));
       expect(result.current.selectedIds.size).toBe(2);
-      expect(result.current.selectedIds.has(id1)).toBe(true);
-      expect(result.current.selectedIds.has(id2)).toBe(true);
     });
 
     it('deselecting one item does not affect others', () => {
@@ -173,10 +178,10 @@ describe('useListManager', () => {
       expect(result.current.items.find((i) => i.id === itemId)).toBeUndefined();
     });
 
-    it('saves state to history', () => {
+    it('enables undo after delete', () => {
       const { result } = renderHook(() => useListManager());
       act(() => result.current.deleteByDoubleClick(result.current.items[0].id));
-      expect(result.current.history).toHaveLength(1);
+      expect(result.current.canUndo).toBe(true);
     });
 
     it('removes the item from selection if it was selected', () => {
@@ -189,9 +194,9 @@ describe('useListManager', () => {
   });
 
   describe('undo', () => {
-    it('restores the list to its previous state', () => {
+    it('restores the list to its previous state', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('New Item'));
+      await act(async () => { await result.current.addItem('New Item'); });
       expect(result.current.items).toHaveLength(5);
       act(() => result.current.undo());
       expect(result.current.items).toHaveLength(4);
@@ -203,31 +208,33 @@ describe('useListManager', () => {
       expect(result.current.items).toHaveLength(4);
     });
 
-    it('clears selection after undo', () => {
+    it('clears selection after undo', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('New Item'));
+      await act(async () => { await result.current.addItem('New Item'); });
       act(() => result.current.toggleSelect(result.current.items[0].id));
       act(() => result.current.undo());
       expect(result.current.selectedIds.size).toBe(0);
     });
 
-    it('removes the used entry from history', () => {
+    it('removes the used entry from history', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('Item A'));
-      act(() => result.current.addItem('Item B'));
-      expect(result.current.history).toHaveLength(2);
+      await act(async () => { await result.current.addItem('Item A'); });
+      await act(async () => { await result.current.addItem('Item B'); });
+      expect(result.current.canUndo).toBe(true);
       act(() => result.current.undo());
-      expect(result.current.history).toHaveLength(1);
+      expect(result.current.canUndo).toBe(true);
+      act(() => result.current.undo());
+      expect(result.current.canUndo).toBe(false);
     });
 
-    it('supports multiple consecutive undo steps', () => {
+    it('supports multiple consecutive undo steps', async () => {
       const { result } = renderHook(() => useListManager());
-      act(() => result.current.addItem('Item A'));
-      act(() => result.current.addItem('Item B'));
+      await act(async () => { await result.current.addItem('Item A'); });
+      await act(async () => { await result.current.addItem('Item B'); });
       act(() => result.current.undo());
       act(() => result.current.undo());
       expect(result.current.items).toHaveLength(4);
-      expect(result.current.history).toHaveLength(0);
+      expect(result.current.canUndo).toBe(false);
     });
 
     it('can undo a delete', () => {

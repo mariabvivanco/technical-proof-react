@@ -8,6 +8,12 @@ vi.mock('react-dom', async () => {
   return { ...actual, createPortal: (node: React.ReactNode) => node };
 });
 
+vi.mock('../services/itemService', () => ({
+  createItem: vi.fn((text: string) =>
+    Promise.resolve({ id: crypto.randomUUID(), text }),
+  ),
+}));
+
 // When the modal is open there are two "Add" buttons:
 // [0] = ActionButtons Add (open modal), [1] = modal Add (confirm)
 const getPageAddButton = () => screen.getAllByRole('button', { name: /^add$/i })[0];
@@ -169,7 +175,9 @@ describe('App - Integration', () => {
       await user.click(getPageAddButton());
       await user.type(screen.getByPlaceholderText('Type the text here...'), 'New Item');
       await user.click(getModalAddButton());
-      expect(screen.getByRole('button', { name: /undo/i })).toBeEnabled();
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /undo/i })).toBeEnabled()
+      );
     });
 
     it('restores list after undoing an add', async () => {
@@ -178,6 +186,9 @@ describe('App - Integration', () => {
       await user.click(getPageAddButton());
       await user.type(screen.getByPlaceholderText('Type the text here...'), 'New Item');
       await user.click(getModalAddButton());
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /undo/i })).toBeEnabled()
+      );
       await user.click(screen.getByRole('button', { name: /undo/i }));
       expect(screen.queryByText('New Item')).not.toBeInTheDocument();
       expect(screen.getAllByRole('listitem')).toHaveLength(4);

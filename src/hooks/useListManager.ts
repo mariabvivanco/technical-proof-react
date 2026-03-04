@@ -1,95 +1,66 @@
-import { useState, useCallback } from 'react';
-import type { ListItem, UseListManagerReturn } from '../types';
+import { useState, useOptimistic, useCallback, startTransition } from 'react';
+import type { ListItem } from '../types';
+import { createItem } from '../services/itemService';
+import useModal from './useModal';
+import useSelection from './useSelection';
+import useHistory from './useHistory';
 
-const generateId = () => `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const INITIAL_ITEMS: ListItem[] = [
+  { id: crypto.randomUUID(), text: 'Item 1' },
+  { id: crypto.randomUUID(), text: 'Item 2' },
+  { id: crypto.randomUUID(), text: 'Item 3' },
+  { id: crypto.randomUUID(), text: 'Item 4' },
+];
 
-const useListManager = (): UseListManagerReturn => {
-  const [items, setItems] = useState<ListItem[]>([
-    { id: generateId(), text: 'Item 1' },
-    { id: generateId(), text: 'Item 2' },
-    { id: generateId(), text: 'Item 3' },
-    { id: generateId(), text: 'Item 4' },
-  ]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [history, setHistory] = useState<ListItem[][]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const saveToHistory = useCallback((currentItems: ListItem[]) => {
-    setHistory((prev) => [...prev, currentItems]);
-  }, []);
-
-  const addItem = useCallback(
-    (text: string) => {
-      const trimmed = text.trim();
-      if (!trimmed) return;
-
-      saveToHistory(items);
-      setItems((prev) => [...prev, { id: generateId(), text: trimmed }]);
-      setIsModalOpen(false);
-    },
-    [items, saveToHistory]
+const useListManager = () => {
+  const [items, setItems] = useState<ListItem[]>(INITIAL_ITEMS);
+  const [optimisticItems, addOptimistic] = useOptimistic(
+    items,
+    (state: ListItem[], item: ListItem) => [...state, item],
   );
+
+  const modal = useModal();
+  const { selectedIds, toggle: toggleSelect, clear: clearSelection, remove: removeFromSelection } = useSelection();
+  const { save, undo, canUndo } = useHistory(restored => {
+    setItems(restored);
+    clearSelection();
+  });
+
+  const addItem = async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    startTransition(() => addOptimistic({ id: crypto.randomUUID(), text: trimmed }));
+    save(items);
+    const item = await createItem(trimmed);
+    setItems(prev => [...prev, item]);
+    modal.close();
+  };
 
   const deleteSelected = useCallback(() => {
-    if (selectedIds.size === 0) return;
+    if (!selectedIds.size) return;
+    save(items);
+    setItems(prev => prev.filter(({ id }) => !selectedIds.has(id)));
+    clearSelection();
+  }, [items, selectedIds, save, clearSelection]);
 
-    saveToHistory(items);
-    setItems((prev) => prev.filter((item) => !selectedIds.has(item.id)));
-    setSelectedIds(new Set());
-  }, [items, selectedIds, saveToHistory]);
-
-  const toggleSelect = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const deleteByDoubleClick = useCallback(
-    (id: string) => {
-      saveToHistory(items);
-      setItems((prev) => prev.filter((item) => item.id !== id));
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    },
-    [items, saveToHistory]
-  );
-
-  const undo = useCallback(() => {
-    if (history.length === 0) return;
-
-    setHistory((prev) => {
-      const newHistory = [...prev];
-      const previousItems = newHistory.pop()!;
-      setItems(previousItems);
-      setSelectedIds(new Set());
-      return newHistory;
-    });
-  }, [history]);
-
-  const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const deleteByDoubleClick = useCallback((id: string) => {
+    save(items);
+    setItems(prev => prev.filter(item => item.id !== id));
+    removeFromSelection(id);
+  }, [items, save, removeFromSelection]);
 
   return {
-    items,
+    items: optimisticItems,
     selectedIds,
-    history,
-    isModalOpen,
+    canUndo,
+    isModalOpen: modal.isOpen,
     addItem,
     deleteSelected,
     toggleSelect,
     deleteByDoubleClick,
     undo,
-    openModal,
-    closeModal,
+    openModal: modal.open,
+    closeModal: modal.close,
   };
 };
 

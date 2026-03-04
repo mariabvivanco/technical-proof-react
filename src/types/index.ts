@@ -6,12 +6,12 @@ export interface ListItem {
 export interface ListManagerState {
   items: ListItem[];
   selectedIds: Set<string>;
-  history: ListItem[][];
+  canUndo: boolean;
   isModalOpen: boolean;
 }
 
 export interface ListManagerActions {
-  addItem: (text: string) => void;
+  addItem: (text: string) => Promise<void>;
   deleteSelected: () => void;
   toggleSelect: (id: string) => void;
   deleteByDoubleClick: (id: string) => void;

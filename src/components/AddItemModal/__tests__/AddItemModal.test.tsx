@@ -11,7 +11,7 @@ vi.mock('react-dom', async () => {
 describe('AddItemModal', () => {
   const defaultProps = {
     open: true,
-    onAdd: vi.fn(),
+    onAdd: vi.fn().mockResolvedValue(undefined),
     onClose: vi.fn(),
   };
 
