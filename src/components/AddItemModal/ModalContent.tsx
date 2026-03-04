@@ -40,6 +40,8 @@ const ModalContent = ({ onAdd, onClose }: ModalContentProps) => {
         <input
           name="text"
           autoFocus
+          required
+          aria-required="true"
           className={styles['modal-input']}
           placeholder="Type the text here..."
           value={value}

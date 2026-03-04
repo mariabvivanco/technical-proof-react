@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AddItemModal from '../AddItemModal';
@@ -100,5 +100,11 @@ describe('AddItemModal', () => {
     await user.type(input, 'Some text');
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(input).toHaveValue('');
+  });
+
+  it('calls onClose when clicking the overlay background', () => {
+    const { container } = render(<AddItemModal {...defaultProps} />);
+    fireEvent.click(container.firstChild as HTMLElement);
+    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -77,4 +77,44 @@ describe('ItemList', () => {
     expect(defaultProps.onSelect).toHaveBeenNthCalledWith(1, '1');
     expect(defaultProps.onSelect).toHaveBeenNthCalledWith(2, '3');
   });
+
+  it('sets aria-selected based on selection state', () => {
+    render(<ItemList {...defaultProps} selectedIds={new Set(['2'])} />);
+    const items = screen.getAllByRole('option');
+    expect(items[0]).toHaveAttribute('aria-selected', 'false');
+    expect(items[1]).toHaveAttribute('aria-selected', 'true');
+    expect(items[2]).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('calls onSelect when Enter is pressed on an item', async () => {
+    const user = userEvent.setup();
+    render(<ItemList {...defaultProps} />);
+    screen.getAllByRole('option')[0].focus();
+    await user.keyboard('{Enter}');
+    expect(defaultProps.onSelect).toHaveBeenCalledWith('1');
+  });
+
+  it('calls onSelect when Space is pressed on an item', async () => {
+    const user = userEvent.setup();
+    render(<ItemList {...defaultProps} />);
+    screen.getAllByRole('option')[0].focus();
+    await user.keyboard(' ');
+    expect(defaultProps.onSelect).toHaveBeenCalledWith('1');
+  });
+
+  it('calls onDoubleClick when Delete is pressed on an item', async () => {
+    const user = userEvent.setup();
+    render(<ItemList {...defaultProps} />);
+    screen.getAllByRole('option')[0].focus();
+    await user.keyboard('{Delete}');
+    expect(defaultProps.onDoubleClick).toHaveBeenCalledWith('1');
+  });
+
+  it('calls onDoubleClick when Backspace is pressed on an item', async () => {
+    const user = userEvent.setup();
+    render(<ItemList {...defaultProps} />);
+    screen.getAllByRole('option')[0].focus();
+    await user.keyboard('{Backspace}');
+    expect(defaultProps.onDoubleClick).toHaveBeenCalledWith('1');
+  });
 });
